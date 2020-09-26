@@ -976,15 +976,15 @@ class DMLWhereBase(object):
     _where_criteria = ()
 
     @_generative
-    def where(self, whereclause):
-        """Return a new construct with the given expression added to
+    def where(self, *whereclause):
+        """Return a new construct with the given expression(s) added to
         its WHERE clause, joined to the existing clause via AND, if any.
 
         """
 
-        self._where_criteria += (
-            coercions.expect(roles.WhereHavingRole, whereclause),
-        )
+        for criterion in list(whereclause):
+            where_criteria = coercions.expect(roles.WhereHavingRole, criterion)
+            self._where_criteria += (where_criteria,)
 
     def filter(self, *criteria):
         """A synonym for the :meth:`_dml.DMLWhereBase.where` method.

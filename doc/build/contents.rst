@@ -11,6 +11,8 @@ documentation, see :ref:`index_toplevel`.
    :includehidden:
 
    intro
+   tutorial
+   queryguide
    orm/index
    core/index
    dialects/index

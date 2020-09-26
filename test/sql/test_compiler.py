@@ -1627,6 +1627,15 @@ class SelectTest(fixtures.TestBase, AssertsCompiledSQL):
             "SELECT mytable.myid FROM mytable",
         )
 
+    def test_where_multiple(self):
+        self.assert_compile(
+            select(table1.c.myid).where(
+                table1.c.myid == 12, table1.c.name == "foobar"
+            ),
+            "SELECT mytable.myid FROM mytable WHERE mytable.myid = :myid_1 "
+            "AND mytable.name = :name_1",
+        )
+
     def test_order_by_nulls(self):
         self.assert_compile(
             table2.select().order_by(
@@ -5018,6 +5027,12 @@ class CorrelateTest(fixtures.TestBase, AssertsCompiledSQL):
             select(t2, s1.correlate(t2).scalar_subquery())
         )
 
+    def test_correlate_semiauto_column_correlate_from_subq(self):
+        t1, t2, s1 = self._fixture()
+        self._assert_column_correlated(
+            select(t2, s1.scalar_subquery().correlate(t2))
+        )
+
     def test_correlate_semiauto_from(self):
         t1, t2, s1 = self._fixture()
         self._assert_from_uncorrelated(select(t2, s1.correlate(t2).alias()))
@@ -5026,6 +5041,12 @@ class CorrelateTest(fixtures.TestBase, AssertsCompiledSQL):
         t1, t2, s1 = self._fixture()
         self._assert_having_correlated(
             select(t2).having(t2.c.a == s1.correlate(t2).scalar_subquery())
+        )
+
+    def test_correlate_semiauto_having_from_subq(self):
+        t1, t2, s1 = self._fixture()
+        self._assert_having_correlated(
+            select(t2).having(t2.c.a == s1.scalar_subquery().correlate(t2))
         )
 
     def test_correlate_except_inclusion_where(self):
